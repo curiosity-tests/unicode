@@ -1,6 +1,21 @@
+run-name: "CI ${{ inputs.leg || github.event_name }} ${{ inputs.racecar_run }}"
 on: 
   pull_request:
   workflow_dispatch:
+    inputs:
+      leg:
+        description: "baseline (uninstrumented) or instrumented (under chalk/curiosity)"
+        type: choice
+        options: [instrumented, baseline]
+        default: baseline
+      profile:
+        description: "CrashOverride chalk profile"
+        type: string
+        default: curiosity-tests-racecar
+      racecar_run:
+        description: "racecar correlation token, echoed into the run name"
+        type: string
+        default: ""
   workflow_call:
     inputs:
       ref:
@@ -18,6 +33,7 @@ concurrency:
 permissions: {}
 
 env:
+  CHALK_ON: ${{ inputs.leg == 'instrumented' }}
   ZIG_VERSION: "0.16.0"
 
 jobs:
@@ -51,8 +67,6 @@ jobs:
         os:
           - ubuntu-26.04
           - ubuntu-26.04-arm
-          - macos-26
-          - windows-2025
     defaults:
       run:
         shell: bash
